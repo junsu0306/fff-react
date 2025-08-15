@@ -5,6 +5,10 @@
   --accent-soft: rgba(0, 255, 157, 0.22);
   --card-bg-1: rgba(8, 10, 12, 0.88);
   --card-bg-2: rgba(18, 24, 24, 0.92);
+
+  /* 패럴랙스용 마우스 오프셋(px) */
+  --mx: 0px;
+  --my: 0px;
 }
 
 * { box-sizing: border-box; }
@@ -12,31 +16,71 @@ html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  /* 해킹 분위기: 모노스페이스 계열로 */
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono",
                "Fira Code", Consolas, monospace;
 
-  /* 배경: 원본 이미지 + 은은한 네온 그린 글로우 오버레이 */
-  background:
-    radial-gradient(1000px 560px at 50% 115%, rgba(0,255,157,0.08), transparent 70%),
-    radial-gradient(900px 420px at 50% -10%, rgba(0,255,157,0.05), transparent 60%),
-    url('/images/background.jpg') center / cover no-repeat,
-    var(--bg);
+  /* JS/CSS 레이어가 실패할 때를 위한 정적 폴백 */
+  background: radial-gradient(1200px 600px at 50% 110%, #0b0b0d 30%, #000 70%);
   color: var(--text);
-  overflow: hidden; /* 기본 스크롤 방지 */
-  background-attachment: fixed;
+  overflow: hidden;
 }
 
+/* 링크/스크롤바 */
 a { color: inherit; text-decoration: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { scrollbar-width: none; }
 
-/* Card 기본 그림자/전환 */
+/* ===== Live Moving Background ===== */
+.live-bg {
+  position: fixed;
+  inset: -2%;                 /* 가장자리에 여유 */
+  z-index: -1;                /* 콘텐츠 뒤 */
+  pointer-events: none;
+  background: url('/images/background.jpg') center / cover no-repeat;
+  will-change: transform, filter;
+  /* 드리프트 + 패럴랙스 + 확대(모서리 노출 방지) */
+  transform: translate3d(var(--mx), var(--my), 0) scale(1.06);
+  filter: brightness(.85) saturate(1.05) contrast(1.05);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  0%   { transform: translate3d(calc(var(--mx) - 1.5%), calc(var(--my) - 1%), 0)   scale(1.06); }
+  50%  { transform: translate3d(calc(var(--mx) + 1.2%), calc(var(--my) + 1%), 0)   scale(1.06); }
+  100% { transform: translate3d(calc(var(--mx) - 1%),   calc(var(--my) + 1.5%), 0) scale(1.06); }
+}
+
+/* 네온 그린 오버레이(은은하게 펄스) */
+.live-bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1000px 560px at 50% 115%, rgba(0,255,157,0.08), transparent 70%),
+    radial-gradient(900px 420px at 50% -10%, rgba(0,255,157,0.05), transparent 60%),
+    linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.6));
+  mix-blend-mode: screen;
+  animation: pulse 8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: .55; }
+  50%      { opacity: .85; }
+}
+
+/* 사용자 환경설정: 모션 최소화 */
+@media (prefers-reduced-motion: reduce) {
+  .live-bg, .live-bg-overlay {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ===== Card & UI ===== */
 .card {
   border-radius: 16px;
   box-shadow:
     0 8px 30px rgba(0,0,0,.55),
-    0 0 0 1px rgba(255,255,255,0.04) inset;
+    0 0 0 1px rgba(255,255,255,0.03) inset;
   transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, filter 120ms ease;
   will-change: transform;
   cursor: pointer;
@@ -49,7 +93,6 @@ a { color: inherit; text-decoration: none; }
   filter: drop-shadow(0 0 8px var(--accent-soft));
 }
 
-/* 상단 바도 다크+네온 느낌으로 */
 .topbar {
   position: fixed;
   top: 12px;

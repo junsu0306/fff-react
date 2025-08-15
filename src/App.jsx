@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import ArcCarousel from './components/ArcCarousel.jsx'
 import BackButton from './components/BackButton.jsx'
+import LiveBackground from './components/LiveBackground.jsx'   // ← 추가
 import Page01 from './pages/Page01.jsx'
 import Page02 from './pages/Page02.jsx'
 import Page03 from './pages/Page03.jsx'
@@ -30,7 +31,6 @@ function Home() {
   return (
     <div style={{height:'100vh', display:'flex', flexDirection:'column', justifyContent:'flex-end'}}>
       <BackButton />
-      {/* 중앙 제목 변경 */}
       <div style={{textAlign:'center', marginTop:'10vh', letterSpacing:'.24em', opacity:.9}}>
         cipher.
       </div>
@@ -44,23 +44,26 @@ function Home() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/p/1" element={<Page01 />} />
-      <Route path="/p/2" element={<Page02 />} />
-      <Route path="/p/3" element={<Page03 />} />
-      <Route path="/p/4" element={<Page04 />} />
-      <Route path="/p/5" element={<Page05 />} />
-      <Route path="/p/6" element={<Page06 />} />
-      <Route path="/p/7" element={<Page07 />} />
-      <Route path="/p/8" element={<Page08 />} />
-      <Route path="/p/9" element={<Page09 />} />
-      <Route path="/p/10" element={<Page10 />} />
-      <Route path="/p/11" element={<Page11 />} />
-      <Route path="/p/12" element={<Page12 />} />
-      <Route path="/p/13" element={<Page13 />} />
-      <Route path="/p/14" element={<Page14 />} />
-      <Route path="/p/15" element={<Page15 />} />
-    </Routes>
+    <>
+      <LiveBackground />  {/* ← 전역 배경(모든 페이지 뒤) */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/p/1" element={<Page01 />} />
+        <Route path="/p/2" element={<Page02 />} />
+        <Route path="/p/3" element={<Page03 />} />
+        <Route path="/p/4" element={<Page04 />} />
+        <Route path="/p/5" element={<Page05 />} />
+        <Route path="/p/6" element={<Page06 />} />
+        <Route path="/p/7" element={<Page07 />} />
+        <Route path="/p/8" element={<Page08 />} />
+        <Route path="/p/9" element={<Page09 />} />
+        <Route path="/p/10" element={<Page10 />} />
+        <Route path="/p/11" element={<Page11 />} />
+        <Route path="/p/12" element={<Page12 />} />
+        <Route path="/p/13" element={<Page13 />} />
+        <Route path="/p/14" element={<Page14 />} />
+        <Route path="/p/15" element={<Page15 />} />
+      </Routes>
+    </>
   )
 }
