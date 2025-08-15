@@ -1,0 +1,53 @@
+# --- Node & package managers ---
+node_modules/
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# (권장) 잠금파일은 버전 고정을 위해 커밋하세요.
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# --- Vite / 빌드 산출물 ---
+dist/
+dist-ssr/
+.vite/
+vite.config.ts.timestamp-*.mjs
+
+# --- 캐시/툴링 ---
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# --- 테스트 커버리지 ---
+coverage/
+.nyc_output/
+
+# --- 환경변수 파일 ---
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- 에디터/IDE ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# --- OS 별 불필요 파일 ---
+.DS_Store
+Thumbs.db
+
+# --- 기타 임시 파일 ---
+*.swp
+*.swo
+*.tmp
+*.pid
+*.pid.lock

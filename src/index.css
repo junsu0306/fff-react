@@ -1,0 +1,83 @@
+:root {
+  --bg: #000000;
+  --text: #cfeee0;        /* 연청녹 */
+  --accent: #00ff9d;      /* 네온 그린 */
+  --accent-soft: rgba(0, 255, 157, 0.22);
+  --card-bg-1: rgba(8, 10, 12, 0.88);
+  --card-bg-2: rgba(18, 24, 24, 0.92);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  /* 해킹 분위기: 모노스페이스 계열로 */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono",
+               "Fira Code", Consolas, monospace;
+
+  /* 배경: 원본 이미지 + 은은한 네온 그린 글로우 오버레이 */
+  background:
+    radial-gradient(1000px 560px at 50% 115%, rgba(0,255,157,0.08), transparent 70%),
+    radial-gradient(900px 420px at 50% -10%, rgba(0,255,157,0.05), transparent 60%),
+    url('/images/background.jpg') center / cover no-repeat,
+    var(--bg);
+  color: var(--text);
+  overflow: hidden; /* 기본 스크롤 방지 */
+  background-attachment: fixed;
+}
+
+a { color: inherit; text-decoration: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { scrollbar-width: none; }
+
+/* Card 기본 그림자/전환 */
+.card {
+  border-radius: 16px;
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.55),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease, filter 120ms ease;
+  will-change: transform;
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+}
+.card:hover {
+  box-shadow:
+    0 0 18px var(--accent-soft),
+    0 18px 60px rgba(0,0,0,.6);
+  filter: drop-shadow(0 0 8px var(--accent-soft));
+}
+
+/* 상단 바도 다크+네온 느낌으로 */
+.topbar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2000;
+  background: rgba(10, 12, 14, 0.55);
+  border: 1px solid rgba(255,255,255,.06);
+  padding: 8px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 10px rgba(0,0,0,.6), 0 0 12px rgba(0,255,157,0.06) inset;
+}
+
+.back-btn {
+  border: 1px solid rgba(0,255,157,0.35);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: rgba(0, 255, 157, 0.06);
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: .2px;
+  cursor: pointer;
+  text-shadow: 0 0 4px rgba(0,255,157,0.5);
+}
+.back-btn:hover {
+  background: rgba(0,255,157,0.12);
+  box-shadow: 0 0 10px rgba(0,255,157,0.2);
+}
