@@ -21,13 +21,7 @@ React 19 + Vite 기반, 다크/네온 테마와 3D/애니메이션 확장을 고
 ## 🚀 시작하기
 ```bash
 # 의존성 설치 (React 19 기준)
-npm i three @react-three/fiber @react-three/drei \
-@react-three/postprocessing postprocessing three-stdlib \
-maath zustand leva troika-three-text \
-framer-motion gsap @react-spring/three @react-spring/web
-
-# 개발 플러그인
-npm i -D vite-plugin-glsl vite-imagetools vite-plugin-svgr
+npm install
 
 # 개발 서버
 npm run dev   # http://localhost:5173
