@@ -1,63 +1,16 @@
-/* --- Page02 전체를 덮는 컨테이너 스타일  --- */
+/* --- Page02 전체를 덮는 컨테이너 스타일 --- */
 .page02-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* public/images/cast.png 와 같은 배경 이미지 경로 */
     background-image: url('/images/cast.png');
-    background-color: #eaf2f8; /* 이미지가 로드되기 전의 밝은 파란색 계열 배경 */
+    background-color: #eaf2f8;
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     overflow-y: auto;
-}
-
-/* --- 페이지 전환 효과 스타일 --- */
-.page-turn-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    perspective: 2000px;
-    transition: opacity 0.5s ease 1s;
-}
-
-.page-cover {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    background-color: #1c3b57; /* 어두운 파란색 책 표지 */
-    backface-visibility: hidden;
-    transition: transform 1s ease-in-out;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #aed6f1; /* 밝은 파란색 텍스트 */
-    font-size: 1.5em;
-    font-family: 'Courier New', Courier, monospace;
-}
-
-    .page-cover.left {
-        left: 0;
-        transform-origin: right center;
-    }
-
-    .page-cover.right {
-        right: 0;
-        transform-origin: left center;
-    }
-
-.page-turn-container.opening .page-cover.left {
-    transform: rotateY(180deg);
-}
-
-.page-turn-container.opening .page-cover.right {
-    transform: rotateY(-180deg);
 }
 
 /* --- 콘텐츠 스타일 (검정색 텍스트) --- */
@@ -74,7 +27,7 @@
         opacity: 0.9;
     }
 
-/* --- 인터랙션 영역 스타일 (밝은 테마) --- */
+/* --- 인터랙션 영역 스타일 --- */
 .text-container {
     background-color: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(5px);
@@ -107,24 +60,57 @@
             background: #95a5a6;
         }
 
+/* --- ★★★ 피어오르는 불꽃 입자 애니메이션 정의 ★★★ --- */
+@keyframes risingSparks {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-60px) rotate(15deg); /* 위로 올라가며 약간 회전 */
+    }
+}
+
 /* 흩어져 있는 철자 스타일 */
 .inline-crypto-char.trigger-char {
     cursor: pointer;
 }
 
-/* 활성화될 때 빛나는 효과 (보라색 계열) */
+/* ★★★ 활성화될 때의 스타일 (글자 자체 + 불꽃 입자) ★★★ */
 .inline-crypto-char.lit {
-    color: #8e44ad; /* 메인 보라색 */
-    font-weight: bold;
-    text-shadow: 0 0 8px rgba(142, 68, 173, 0.5); /* 보라색 그림자 */
+    color: #ff4500;
+    text-shadow: 0 0 5px #fff, 0 0 10px #ff4500, 0 0 15px #ff4500;
+    /* 가상 요소(불꽃 입자)의 기준점이 되도록 설정 */
+    position: relative;
 }
 
-/* 날아가는 애니메이션 글자 (보라색 계열)*/
+    /* ★★★ 피어오르는 불꽃 입자(가상 요소) 스타일 ★★★ */
+    .inline-crypto-char.lit::before {
+        content: '';
+        position: absolute;
+        /* 글자 중앙 위쪽에 위치 */
+        top: -10px;
+        left: 50%;
+        /* 입자 생성기 역할 (보이지 않음) */
+        width: 3px;
+        height: 3px;
+        background: transparent;
+        /* box-shadow를 이용해 여러 개의 불꽃 입자처럼 보이게 함 */
+        box-shadow: 0 0 10px 2px #ff6347, /* 중앙의 부드러운 빛 */
+        -5px -12px 8px 1px #ff4500, 8px -8px 7px 0px #ffdd00, /* 노란색 입자 추가 */
+        3px -18px 6px 1px #ff6347, -9px -25px 9px 0px #ff4500, 12px -30px 10px 1px #ffdd00;
+        /* 애니메이션 적용 */
+        animation: risingSparks 1.5s ease-out infinite;
+    }
+
+/* 날아가는 애니메이션 글자 (불꽃 색상) */
 .flying-char {
     font-size: 48px;
     font-weight: bold;
-    color: #8e44ad; /* 메인 보라색 */
-    text-shadow: 0 0 10px rgba(142, 68, 173, 0.6); /* 보라색 그림자 */
+    color: #ff4500;
+    text-shadow: 0 0 8px rgba(255, 69, 0, 0.7);
     position: absolute;
     font-family: 'Courier New', monospace;
     z-index: 10;
