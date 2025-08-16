@@ -4,13 +4,16 @@ import { useGLTF, Text, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import BackButton from '../components/BackButton.jsx'
 
-const BinaryText = ({ position, text, color = '#00ff9d' }) => {
+const InfernalBinaryText = ({ position, text, color = '#ff6600' }) => {
   const meshRef = useRef()
   
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.position.y += Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.002
-      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.3 + position[2]) * 0.1
+      // More intense floating motion like burning embers
+      meshRef.current.position.y += Math.sin(state.clock.elapsedTime * 0.8 + position[0]) * 0.004
+      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5 + position[2]) * 0.15
+      // Add slight rotation for flame-like effect
+      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.7 + position[1]) * 0.1
     }
   })
 
@@ -18,7 +21,7 @@ const BinaryText = ({ position, text, color = '#00ff9d' }) => {
     <Text
       ref={meshRef}
       position={position}
-      fontSize={2}
+      fontSize={2.2}
       color={color}
       anchorX="center"
       anchorY="middle"
@@ -28,36 +31,40 @@ const BinaryText = ({ position, text, color = '#00ff9d' }) => {
   )
 }
 
-const BinaryOcean = () => {
+const InfernalBinaryOcean = () => {
   const binaryRefs = useRef([])
   const [binaryData, setBinaryData] = useState([])
 
   useEffect(() => {
-    const generateBinaryField = () => {
+    const generateInfernalBinaryField = () => {
       const data = []
-      for (let i = 0; i < 1000; i++) {
+      for (let i = 0; i < 1200; i++) {
         data.push({
           position: [
-            (Math.random() - 0.5) * 100,
-            (Math.random() - 0.5) * 50,
-            (Math.random() - 0.5) * 100
+            (Math.random() - 0.5) * 120,
+            (Math.random() - 0.5) * 60,
+            (Math.random() - 0.5) * 120
           ],
-          text: Math.random() > 0.5 ? '1' : '0',
-          speed: Math.random() * 0.02 + 0.005,
-          phase: Math.random() * Math.PI * 2
+          text: Math.random() > 0.6 ? '1' : '0',
+          speed: Math.random() * 0.03 + 0.008,
+          phase: Math.random() * Math.PI * 2,
+          burnIntensity: Math.random()
         })
       }
       setBinaryData(data)
     }
-    generateBinaryField()
+    generateInfernalBinaryField()
   }, [])
 
   useFrame((state) => {
     binaryRefs.current.forEach((ref, index) => {
       if (ref && binaryData[index]) {
         const data = binaryData[index]
-        ref.position.y = data.position[1] + Math.sin(state.clock.elapsedTime * data.speed + data.phase) * 2
-        ref.material.opacity = 0.3 + Math.sin(state.clock.elapsedTime * 0.5 + data.phase) * 0.3
+        // Floating like embers in hell
+        ref.position.y = data.position[1] + Math.sin(state.clock.elapsedTime * data.speed + data.phase) * 3
+        ref.position.x = data.position[0] + Math.sin(state.clock.elapsedTime * 0.3 + data.phase) * 0.5
+        // Flickering like flames
+        ref.material.opacity = 0.4 + Math.sin(state.clock.elapsedTime * 2 + data.phase) * 0.4
       }
     })
   })
@@ -65,11 +72,11 @@ const BinaryOcean = () => {
   return (
     <>
       {binaryData.map((data, index) => (
-        <BinaryText
+        <InfernalBinaryText
           key={index}
           position={data.position}
           text={data.text}
-          color={data.text === '1' ? '#00ff9d' : '#0088ff'}
+          color={data.text === '1' ? '#ff6600' : '#ff0000'}
         />
       ))}
     </>
@@ -122,53 +129,75 @@ const SwimmingFish = ({ fishModel, position, speed = 1, scale = 1 }) => {
   )
 }
 
-const OceanEnvironment = () => {
+const InfernalEnvironment = () => {
   return (
     <>
-      <ambientLight intensity={1.2} color="#ffffff" />
+      {/* Mixed lighting: hell theme + neutral for fish */}
+      <ambientLight intensity={0.8} color="#ffffff" />
       <directionalLight 
         position={[10, 10, 5]} 
-        intensity={2.5} 
+        intensity={1.5} 
         color="#ffffff"
         castShadow
       />
       <directionalLight 
         position={[-10, 10, 5]} 
-        intensity={2.0} 
-        color="#00ff9d"
+        intensity={1.0} 
+        color="#ff6600"
       />
       <directionalLight 
         position={[0, -10, 10]} 
-        intensity={1.8} 
-        color="#0088ff"
+        intensity={0.8} 
+        color="#ff3300"
       />
       <pointLight 
         position={[20, 15, 20]} 
-        intensity={2.5} 
+        intensity={1.5} 
         color="#ffffff"
         distance={100}
       />
       <pointLight 
         position={[-20, 15, -20]} 
-        intensity={2.5} 
+        intensity={1.5} 
         color="#ffffff"
         distance={100}
       />
       <pointLight 
         position={[0, 30, 0]} 
-        intensity={3.0} 
+        intensity={2.0} 
         color="#ffffff"
         distance={80}
       />
       
+      {/* Burning sea floor */}
       <mesh position={[0, -25, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[200, 200]} />
         <meshStandardMaterial 
-          color="#000033" 
+          color="#660000" 
           transparent 
-          opacity={0.3}
+          opacity={0.4}
+          emissive="#330000"
+          emissiveIntensity={0.2}
         />
       </mesh>
+      
+      {/* Floating lava bubbles */}
+      {Array.from({ length: 15 }, (_, i) => (
+        <mesh key={i} position={[
+          (Math.random() - 0.5) * 100,
+          Math.random() * 20 - 10,
+          (Math.random() - 0.5) * 100
+        ]}>
+          <sphereGeometry args={[0.5 + Math.random(), 8, 8]} />
+          <meshStandardMaterial 
+            color="#ff3300"
+            emissive="#ff6600"
+            emissiveIntensity={0.8}
+            transparent
+            opacity={0.7}
+          />
+        </mesh>
+      ))}
     </>
   )
 }
@@ -195,7 +224,7 @@ export default function Page07() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #000011 0%, #001122 50%, #002244 100%)',
+      background: 'linear-gradient(180deg, #1a0000 0%, #330000 30%, #660000 70%, #990000 100%)',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -213,20 +242,22 @@ export default function Page07() {
           fontSize: '48px',
           margin: '0 0 16px',
           letterSpacing: '-0.02em',
-          background: 'linear-gradient(45deg, #00ff9d, #0088ff)',
+          background: 'linear-gradient(45deg, #ff6600, #ff0000)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
+          backgroundClip: 'text',
+          textShadow: '0 0 20px rgba(255, 100, 0, 0.8)'
         }}>
-          어셈블리어 바다
+          Binary Sea
         </h1>
         <p style={{
           fontSize: '18px',
-          opacity: 0.8,
+          opacity: 0.9,
           margin: 0,
-          color: '#00ff9d'
+          color: '#ff9500',
+          textShadow: '0 0 10px rgba(255, 149, 0, 0.6)'
         }}>
-          0과 1의 바다에서 헤엄치는 3D 물고기들
+          🔥 Infernal Binary Ocean  🔥
         </p>
       </div>
 
@@ -235,29 +266,31 @@ export default function Page07() {
         top: '160px',
         right: '24px',
         zIndex: 10,
-        background: 'rgba(0, 0, 0, 0.7)',
+        background: 'rgba(0, 0, 0, 0.8)',
         borderRadius: '12px',
         padding: '16px',
-        border: '1px solid rgba(0, 255, 157, 0.3)'
+        border: '2px solid rgba(255, 100, 0, 0.5)',
+        boxShadow: '0 0 20px rgba(255, 100, 0, 0.3)'
       }}>
         <button
           onClick={() => setIsAutoRotate(!isAutoRotate)}
           style={{
             padding: '8px 16px',
-            background: isAutoRotate ? '#00ff9d' : 'transparent',
-            border: '1px solid #00ff9d',
+            background: isAutoRotate ? '#ff6600' : 'transparent',
+            border: '1px solid #ff6600',
             borderRadius: '6px',
-            color: isAutoRotate ? '#000' : '#00ff9d',
+            color: isAutoRotate ? '#000' : '#ff6600',
+            textShadow: isAutoRotate ? 'none' : '0 0 8px #ff6600',
             cursor: 'pointer',
             fontSize: '14px',
             marginBottom: '8px',
             width: '100%'
           }}
         >
-          {isAutoRotate ? '자동 회전 ON' : '자동 회전 OFF'}
+          {isAutoRotate ? '🔥 INFERNAL ROTATION ON' : '🔥 INFERNAL ROTATION OFF'}
         </button>
-        <div style={{ fontSize: '12px', color: '#888', textAlign: 'center' }}>
-          마우스로 시점 조작 가능
+        <div style={{ fontSize: '12px', color: '#ff9500', textAlign: 'center', textShadow: '0 0 5px #ff6600' }}>
+          Navigate the Burning Binary Sea
         </div>
       </div>
 
@@ -278,8 +311,8 @@ export default function Page07() {
           style={{ background: 'transparent' }}
         >
           <Suspense fallback={null}>
-            <OceanEnvironment />
-            <BinaryOcean />
+            <InfernalEnvironment />
+            <InfernalBinaryOcean />
             
             {fishPositions.map((position, index) => (
               <SwimmingFish
