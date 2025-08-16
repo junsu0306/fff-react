@@ -17,7 +17,7 @@ export default function Page01() {
   return (
     <div style={{ 
       minHeight: '100vh',
-      backgroundImage: 'url(/images/page1.jpg)',
+      backgroundImage: 'url(/images/ice-hell.jpg)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
@@ -76,30 +76,33 @@ function HeaderHUD() {
         margin: 0, 
         letterSpacing: '.18em', 
         opacity: .95,
-        textShadow: '0 0 10px rgba(135,206,250,0.5), 0 0 20px rgba(255,255,255,0.3)',
-        color: '#87ceeb'
-      }}>❄️ Snow Packets ❄️</h1>
+        textShadow: '0 0 15px rgba(255,100,0,0.8), 0 0 30px rgba(255,149,0,0.6)',
+        color: '#ff6600',
+        fontFamily: '"Creepster", "Chiller", serif'
+      }}>🔥 INFERNAL PACKETS 🔥</h1>
       <p style={{ 
         marginTop: 8, 
-        opacity: .8, 
+        opacity: .9, 
         fontSize: 12, 
-        textShadow: '0 0 5px rgba(255,255,255,0.3)',
-        color: '#333333'
+        textShadow: '0 0 8px rgba(255,149,0,0.5)',
+        color: '#ffcc00'
       }}>
-        auto-load: <b>/pcaps/sample.pcap</b> · drag: grab · dblclick/Space: peel · R: reset
+        auto-load: <b>/pcaps/sample.pcap</b> · R: reset flames
       </p>
       <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
         <button onClick={onPick} style={{ 
           fontWeight: 700,
-          backgroundColor: '#2c2c2c',
-          color: '#ffffff',
-          border: '1px solid #444',
-          borderRadius: '6px',
-          padding: '8px 16px',
+          backgroundColor: 'rgba(60,20,0,0.9)',
+          color: '#ffcc00',
+          border: '2px solid rgba(255,100,0,0.6)',
+          borderRadius: '8px',
+          padding: '10px 20px',
           cursor: 'pointer',
           fontSize: '14px',
-          fontFamily: 'ui-monospace, Menlo, monospace'
-        }}>Upload .pcap</button>
+          fontFamily: '"Creepster", monospace',
+          textShadow: '0 0 5px rgba(255,149,0,0.8)',
+          boxShadow: '0 0 15px rgba(255,100,0,0.3)'
+        }}>🔥 Upload PCAP 🔥</button>
         <input ref={fileRef} type="file" accept=".pcap" onChange={onFile} style={{ display: 'none' }} />
       </div>
     </div>
@@ -234,12 +237,9 @@ function parsePCAP(arrayBuffer, maxPackets=1000) {
 function PacketRain() {
   const canvasRef = useRef(null)
   const packetsRef = useRef([])     // 현재 표시 중인 패킷
-  const [selected, setSelected] = useState(null)
-  const [peeledIds, setPeeledIds] = useState(() => new Set())
   const [meta, setMeta] = useState(null) // {version, snaplen, linktype}
   const [source, setSource] = useState('example') // 'example' | 'upload'
   const dropsRef = useRef([])
-  const pointerRef = useRef({ x:0,y:0, down:false, draggingId:null, dx:0, dy:0 })
   const spawnTimerRef = useRef(null)
   const lastSpawnRef = useRef(0)
 
@@ -327,13 +327,13 @@ function PacketRain() {
     const W = cvs.clientWidth, H = cvs.clientHeight
     const base = packetsRef.current.length ? packetsRef.current : synthPackets(20)
     
-    // 즉시 10개 패킷 생성
-    for (let i = 0; i < Math.min(10, base.length); i++) {
+    // 즉시 25개 패킷 생성 (눈보라 효과)
+    for (let i = 0; i < Math.min(25, base.length); i++) {
       const p = base[i]
-      const r = 8 + Math.min(15, Math.log2((p.size||64)) * 1.5)  // 크기 대폭 감소
+      const r = 6 + Math.min(12, Math.log2((p.size||64)) * 1.2)  // 더 작은 눈송이
       
-      const angle = Math.PI/2 + (Math.random() - 0.5) * 0.9  // 90도 기준 ± 변화
-      const speed = 2.0 + Math.random() * 1.5  // 더 빠른 눈송이 속도
+      const angle = Math.PI/2 + (Math.random() - 0.5) * 1.2  // 더 넓은 각도 분산
+      const speed = 4.0 + Math.random() * 3.0  // 훨씬 빠른 눈보라 속도
       const vx = Math.cos(angle) * speed
       const vy = Math.sin(angle) * speed
       
@@ -358,26 +358,26 @@ function PacketRain() {
     const cvs = canvasRef.current
     if (!cvs) return
     
-    const base = packetsRef.current.length ? packetsRef.current : synthPackets(20)
-    let packetIndex = 10  // 이미 10개 생성했으므로 10부터 시작
+    const base = packetsRef.current.length ? packetsRef.current : synthPackets(50)  // 더 많은 synthetic 패킷
+    let packetIndex = 25  // 이미 25개 생성했으므로 25부터 시작
     
     spawnTimerRef.current = setInterval(() => {
       if (packetIndex >= base.length) {
         packetIndex = 0  // 처음부터 다시 시작
       }
       
-      // 최대 20개까지만 동시에 표시
-      if (dropsRef.current.length >= 20) {
+      // 최대 60개까지 동시에 표시 (눈보라 효과)
+      if (dropsRef.current.length >= 60) {
         return
       }
       
       const W = cvs.clientWidth, H = cvs.clientHeight
       const p = base[packetIndex]
-      const r = 8 + Math.min(15, Math.log2((p.size||64)) * 1.5)  // 크기 대폭 감소  // 더 크게
+      const r = 6 + Math.min(12, Math.log2((p.size||64)) * 1.2)  // 더 작은 눈송이
       
-      // 별똥별 궤도: 위에서 아래로 대각선 이동
-      const angle = Math.PI/2 + (Math.random() - 0.5) * 0.6  // 90도 기준 ± 변화
-      const speed = 2.0 + Math.random() * 1.5  // 더 빠른 눈송이 속도
+      // 눈보라: 다양한 각도로 휘날리며 떨어짐
+      const angle = Math.PI/2 + (Math.random() - 0.5) * 1.4  // 더 넓은 각도 분산
+      const speed = 4.0 + Math.random() * 4.0  // 매우 빠른 눈보라 속도
       const vx = Math.cos(angle) * speed
       const vy = Math.sin(angle) * speed
       
@@ -397,7 +397,7 @@ function PacketRain() {
       dropsRef.current.push(newDrop)
       packetIndex++
       
-    }, 600)  // 0.6초마다 새 패킷 생성
+    }, 200)  // 0.2초마다 새 패킷 생성 (훨씬 빠른 생성)
   }
 
   // 루프
@@ -412,61 +412,63 @@ function PacketRain() {
       drawBackground(ctx, W, H)
 
       for (const d of dropsRef.current) {
-        const isDragging = pointerRef.current.draggingId === d.id
-        if (!isDragging) {
           // 트레일 점 추가 (이전 위치 저장)
           d.trail.push({ x: d.x, y: d.y })
-          if (d.trail.length > 12) d.trail.shift()  // 트레일 길이 증가
+          if (d.trail.length > 8) d.trail.shift()  // 짧은 트레일 (눈송이)
           
           // 계층별 서로 다른 애니메이션 효과
           const l3 = d.packet.net?.type || ''
           const l4 = d.packet.trans?.type || ''
           
-          // 기본 별똥별 이동
+          // 기본 눈보라 이동 (더 빠르고 역동적)
           d.x += d.vx
           d.y += d.vy
-          d.phase += 0.01
+          d.phase += 0.02
           
-          // 계층별 특수 효과
+          // 눈보라 바람 효과 - 모든 패킷에 공통 적용
+          const windEffect = Math.sin(Date.now() * 0.001 + d.x * 0.01) * 1.5
+          const turbulence = Math.sin(Date.now() * 0.002 + d.y * 0.01) * 0.8
+          d.x += windEffect
+          d.y += turbulence
+          
+          // 계층별 특수 효과 (눈송이 테마)
           if (l3 === 'IPv4') {
-            // IPv4: 안정적인 직선 이동 + 약간의 펄스
-            d.phase += 0.03
+            // IPv4: 작은 소용돌이 패턴 (작은 눈송이)
+            d.x += Math.cos(d.phase * 8) * 1.2
+            d.y += Math.sin(d.phase * 8) * 0.6
+            d.phase += 0.05
           } else if (l3 === 'IPv6') {
-            // IPv6: 6각형 패턴으로 회전하며 이동
-            d.x += Math.cos(d.phase * 6) * 0.8
-            d.y += Math.sin(d.phase * 6) * 0.4
-            d.phase += 0.02
-          } else if (l3 === 'ARP') {
-            // ARP: 지그재그 패턴
-            d.x += Math.sin(d.phase * 8) * 1.5
+            // IPv6: 육각형 결정 패턴 (육각 눈송이)
+            d.x += Math.cos(d.phase * 6) * 1.5
+            d.y += Math.sin(d.phase * 6) * 0.8
             d.phase += 0.04
+          } else if (l3 === 'ARP') {
+            // ARP: 급격한 지그재그 (눈보라 속 파편)
+            d.x += Math.sin(d.phase * 12) * 2.0
+            d.phase += 0.06
           } else {
-            // 기타: 무작위 흔들림
-            d.x += (Math.random() - 0.5) * 0.8
-            d.y += (Math.random() - 0.5) * 0.4
+            // 기타: 랜덤한 휘날림 (먼지 눈)
+            d.x += (Math.random() - 0.5) * 2.0
+            d.y += (Math.random() - 0.5) * 1.0
           }
           
           // L4 프로토콜별 추가 효과
           if (l4 === 'UDP') {
-            // UDP: 더 빠른 속도 변화 (연결 없음 표현)
-            d.vx *= (0.98 + Math.random() * 0.04)
-            d.vy *= (0.98 + Math.random() * 0.04)
+            // UDP: 불규칙한 속도 변화 (바람에 흩날림)
+            d.vx *= (0.95 + Math.random() * 0.1)
+            d.vy *= (0.95 + Math.random() * 0.1)
+          } else if (l4 === 'TCP') {
+            // TCP: 일정한 속도 유지 (안정적 낙하)
+            d.vx *= 0.998
+            d.vy *= 0.998
           }
-          
-        } else {
-          d.x = pointerRef.current.x + pointerRef.current.dx
-          d.y = pointerRef.current.y + pointerRef.current.dy
-        }
         
         // 화면 밖으로 나가면 제거 (재사용하지 않음)
         if (d.x < -100 || d.y > H + 100) {
           d.shouldRemove = true
         }
 
-        const hovered = isInside(pointerRef.current.x, pointerRef.current.y, d)
-        const peeled = peeledIds.has(d.id)
-        drawDrop(ctx, d, { hovered, selected: selected===d.id })
-        if (peeled) drawPeel(ctx, d, W, H)
+        drawDrop(ctx, d)
       }
 
       // 화면 밖으로 나간 패킷들 제거
@@ -477,7 +479,7 @@ function PacketRain() {
     }
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
-  }, [selected, peeledIds, meta, source])
+  }, [meta, source])
 
   // 컴포넌트 언마운트 시 타이머 정리
   useEffect(() => {
@@ -488,59 +490,21 @@ function PacketRain() {
     }
   }, [])
 
-  // 인터랙션
+  // 키보드 리셋만 유지
   useEffect(() => {
-    const cvs = canvasRef.current
-    const onMove = (e) => {
-      const r = cvs.getBoundingClientRect()
-      pointerRef.current.x = e.clientX - r.left
-      pointerRef.current.y = e.clientY - r.top
-    }
-    const onDown = () => {
-      pointerRef.current.down = true
-      const hit = hitTest(pointerRef.current.x, pointerRef.current.y)
-      if (hit) {
-        pointerRef.current.draggingId = hit.id
-        setSelected(hit.id)
-        pointerRef.current.dx = hit.x - pointerRef.current.x
-        pointerRef.current.dy = hit.y - pointerRef.current.y
-      } else setSelected(null)
-    }
-    const onUp = () => { pointerRef.current.down=false; pointerRef.current.draggingId=null }
-    const onDbl = () => { if (selected) togglePeel(selected) }
     const onKey = (e) => {
-      if (e.key === ' ' || e.code==='Space') {
-        if (selected) { e.preventDefault(); togglePeel(selected) }
-      } else if (e.key.toLowerCase()==='r') {
-        setSelected(null); setPeeledIds(new Set()); 
+      if (e.key.toLowerCase()==='r') {
         if (spawnTimerRef.current) clearInterval(spawnTimerRef.current)
         spawnDrops()
       }
     }
-    cvs.addEventListener('pointermove', onMove)
-    cvs.addEventListener('pointerdown', onDown)
-    window.addEventListener('pointerup', onUp)
-    cvs.addEventListener('dblclick', onDbl)
     window.addEventListener('keydown', onKey)
-    cvs.addEventListener('touchstart', (e)=>e.preventDefault(), { passive:false })
     return () => {
-      cvs.removeEventListener('pointermove', onMove)
-      cvs.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('pointerup', onUp)
-      cvs.removeEventListener('dblclick', onDbl)
       window.removeEventListener('keydown', onKey)
     }
-  }, [selected])
+  }, [])
 
-  function hitTest(px, py) {
-    for (let i=dropsRef.current.length-1;i>=0;i--) if (isInside(px,py,dropsRef.current[i])) return dropsRef.current[i]
-    return null
-  }
-  function togglePeel(id) {
-    setPeeledIds(prev => { const n = new Set(prev); n.has(id)?n.delete(id):n.add(id); return n })
-  }
-
-  return <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%', display:'block' }} aria-label="Packet Rain canvas" />
+  return <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%', display:'block' }} aria-label="Infernal Packet Stream" />
 }
 
 /* ────────────────────────────── Drawing ────────────────────────────── */
@@ -569,45 +533,37 @@ function drawBackground(ctx, W, H) {
   ctx.fillRect(0,0,W,H)
 }
 
-function drawDrop(ctx, d, { hovered, selected }) {
-  const accent = cssVar('--accent', '#00ff9d')
-  const text = cssVar('--text', '#cfeee0')
+function drawDrop(ctx, d) {
   const r = d.r
   const l3 = d.packet.net?.type || ''
   const l4 = d.packet.trans?.type || ''
   
-  // 계층별 색상 정의 (겨울/눈 테마)
+  // 지옥 불꽃 색상 정의
   const layerColors = {
-    'IPv4': '#87ceeb',    // 하늘색 (겨울 하늘)
-    'IPv6': '#e6f3ff',    // 연한 파란색 (눈 결정)
-    'ARP': '#b0e0e6',     // 파우더 블루
-    'TCP': '#add8e6',     // 라이트 블루
-    'UDP': '#f0f8ff',     // 앨리스 블루 (가벼운 눈송이)
-    'ICMP': '#fffafa',    // 눈 백색
-    'default': '#87ceeb'  // 기본 하늘색
+    'IPv4': '#ff6600',    // 주황 불꽃
+    'IPv6': '#ff9900',    // 황금 불꽃
+    'ARP': '#ff3300',     // 빨간 불꽃
+    'TCP': '#ffcc00',     // 노란 불꽃
+    'UDP': '#ff4400',     // 주황-빨강 불꽃
+    'ICMP': '#ffaa00',    // 호박색 불꽃
+    'default': '#ff6600'  // 기본 주황 불꽃
   }
   
   const l3Color = layerColors[l3] || layerColors.default
   const l4Color = layerColors[l4] || layerColors.default
   
-  // 별똥별 트레일 그리기 (계층별 색상 적용)
+  // 불꽃 트레일 (더 간단하게)
   if (d.trail && d.trail.length > 1) {
     ctx.save()
-    ctx.globalCompositeOperation = 'screen'
-    
     for (let i = 0; i < d.trail.length - 1; i++) {
-      const alpha = (i / d.trail.length) * 0.8
-      const trailR = r * (0.2 + alpha * 0.6)
+      const alpha = (i / d.trail.length) * 0.6
+      const trailR = r * (0.3 + alpha * 0.4)
       const point = d.trail[i]
       
-      // 트레일 점들 (작은 별 모양)
-      ctx.save()
-      ctx.translate(point.x, point.y)
-      ctx.fillStyle = withAlpha(l3Color, alpha * 0.8)
-      ctx.shadowColor = withAlpha(l3Color, alpha * 0.6)
-      ctx.shadowBlur = trailR * 0.5
-      drawStar(ctx, 5, trailR * 0.8, trailR * 0.3, true)
-      ctx.restore()
+      ctx.fillStyle = withAlpha(l3Color, alpha * 0.7)
+      ctx.beginPath()
+      ctx.arc(point.x, point.y, trailR, 0, Math.PI * 2)
+      ctx.fill()
     }
     ctx.restore()
   }
@@ -615,106 +571,36 @@ function drawDrop(ctx, d, { hovered, selected }) {
   ctx.save()
   ctx.translate(d.x, d.y)
 
-
-  // 별똥별 외곽 글로우 (큰 글로우)
-  const outerGlow = ctx.createRadialGradient(0, 0, r * 0.3, 0, 0, r * 2)
-  outerGlow.addColorStop(0, withAlpha(l3Color, 0.6))
-  outerGlow.addColorStop(0.3, withAlpha(l3Color, 0.3))
-  outerGlow.addColorStop(0.7, withAlpha(l4Color, 0.2))
+  // 지옥 불꽃 글로우
+  const outerGlow = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r * 1.8)
+  outerGlow.addColorStop(0, withAlpha(l3Color, 0.9))
+  outerGlow.addColorStop(0.4, withAlpha(l3Color, 0.5))
+  outerGlow.addColorStop(0.8, withAlpha(l4Color, 0.2))
   outerGlow.addColorStop(1, withAlpha(l3Color, 0))
   ctx.fillStyle = outerGlow
   ctx.beginPath()
-  ctx.arc(0, 0, r * 2, 0, Math.PI * 2)
+  ctx.arc(0, 0, r * 1.8, 0, Math.PI * 2)
   ctx.fill()
 
-  // 진짜 별 모양 - 외곽 별
-  ctx.save()
-  ctx.fillStyle = withAlpha('#ffffff', 0.9)
-  ctx.shadowColor = withAlpha(l3Color, 1.0)
-  ctx.shadowBlur = r * 1.2
-  drawStar(ctx, 5, r * 0.7, r * 0.3, true)  // 진짜 별 모양 (5개 스파이크)
-  ctx.restore()
+  // 메인 불꽃 파티클
+  ctx.fillStyle = withAlpha(l3Color, 0.9)
+  ctx.shadowColor = l3Color
+  ctx.shadowBlur = r * 0.8
+  ctx.beginPath()
+  ctx.arc(0, 0, r * 0.6, 0, Math.PI * 2)
+  ctx.fill()
 
-  // 프로토콜별 색상 별 (작은 별)
-  ctx.save()
-  ctx.fillStyle = withAlpha(l3Color, 0.8)
-  ctx.shadowColor = withAlpha(l3Color, 0.8)
-  ctx.shadowBlur = r * 0.6
-  drawStar(ctx, 5, r * 0.45, r * 0.2, true)
-  ctx.restore()
-
-  // 중심의 밝은 별 (가장 작은 별)
-  ctx.save()
-  ctx.fillStyle = 'rgba(255,255,255,1.0)'
-  ctx.shadowColor = 'rgba(255,255,255,0.8)'
-  ctx.shadowBlur = r * 0.3
-  drawStar(ctx, 5, r * 0.2, r * 0.08, true)
-  ctx.restore()
-
-  // 인터랙션 효과
-  if (hovered || selected) {
-    ctx.lineWidth = selected ? 3 : 2
-    ctx.strokeStyle = withAlpha(accent, selected ? 1.0 : 0.8)
-    ctx.shadowColor = withAlpha(accent, 0.8)
-    ctx.shadowBlur = selected ? 20 : 12
-    ctx.beginPath()
-    ctx.arc(0, 0, r * 1.3, 0, Math.PI * 2)
-    ctx.stroke()
-
-    // 라벨 표시
-    ctx.shadowBlur = 0
-    ctx.fillStyle = text
-    ctx.font = 'bold 11px ui-monospace, Menlo, monospace'
-    const label = `${l3}/${l4 || ''}`.replace(/\/$/, '')
-    const w = ctx.measureText(label).width
-    ctx.fillStyle = 'rgba(0,0,0,0.8)'
-    roundRect(ctx, -w/2-4, -r*1.6-12, w+8, 16, 4, true, false)
-    ctx.fillStyle = text
-    ctx.fillText(label, -w/2, -r*1.6)
-  }
+  // 중심 하얀 열기
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'
+  ctx.shadowColor = 'rgba(255,255,255,0.6)'
+  ctx.shadowBlur = r * 0.4
+  ctx.beginPath()
+  ctx.arc(0, 0, r * 0.25, 0, Math.PI * 2)
+  ctx.fill()
 
   ctx.restore()
 }
 
-function drawPeel(ctx, d, W, H) {
-  const { eth, net, trans, size, payload } = d.packet
-  const startX = Math.min(Math.max(d.x + 20, 16), W - 280)
-  const startY = Math.min(Math.max(d.y - 8, 60), H - 140)
-  const totalW = 240, h = 18
-
-  ctx.save()
-  ctx.fillStyle = 'rgba(8,10,12,0.9)'; ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1
-  roundRect(ctx, startX-10, startY-32, totalW+20, 120, 8, true, true)
-
-  const ethB=14, l3B = net?.type==='IPv4'?20: net?.type==='IPv6'?40:8, l4B = trans?.type==='TCP'?20: trans?.type==='UDP'?8:8
-  const payB = Math.max(0, payload||0); const sum = Math.max(1, ethB+l3B+l4B+payB)
-  let x = startX
-  const seg=(bytes,color,shape='rect')=>{
-    const w = Math.max(8, Math.round((bytes/sum)*totalW)); ctx.fillStyle=color
-    if (shape==='rect') roundRect(ctx,x,startY,w,h,3,true,false)
-    else if (shape==='hex') drawHexStrip(ctx,x,startY,w,h)
-    else if (shape==='diamond') drawDiamondStrip(ctx,x,startY,w,h)
-    x += w - 0.5
-  }
-  seg(ethB,'rgba(135,206,250,0.35)','rect')
-  if (net?.type==='IPv4') seg(l3B,'rgba(135,206,250,0.25)','rect')
-  else if (net?.type==='IPv6') seg(l3B,'rgba(176,224,230,0.25)','hex')
-  else if (net?.type==='ARP') seg(l3B,'rgba(176,224,230,0.25)','diamond')
-  else seg(l3B,'rgba(135,206,250,0.22)','rect')
-  if (trans?.type==='TCP') seg(l4B,'rgba(173,216,230,0.20)','rect')
-  else if (trans?.type==='UDP') seg(l4B,'rgba(240,248,255,0.18)','rect')
-  else seg(l4B,'rgba(135,206,250,0.16)','rect')
-  seg(payB,'rgba(255,250,250,0.12)','rect')
-
-  ctx.fillStyle = cssVar('--text', '#cfeee0'); ctx.font = '11px ui-monospace, Menlo, monospace'
-  ctx.fillText(`ETH ${eth.src} → ${eth.dst}  (0x${(eth.etherType||0).toString(16)})`, startX, startY-14)
-  let l2 = net?.type || '—'
-  if (net?.type==='IPv4' || net?.type==='IPv6') { l2 += `  ${net.src} → ${net.dst}`; if (net.ttl!=null) l2 += `  ttl=${net.ttl}` }
-  ctx.fillText(l2, startX, startY + h + 14)
-  let l3 = (trans?.type||'—'); if (trans?.sport!=null) l3 += `  ${trans.sport} → ${trans.dport}`; if (trans?.type==='TCP' && trans.flags!=null) l3 += `  flags=${tcpFlagsToStr(trans.flags)}`
-  l3 += `  •  ${size||0}B`; ctx.fillText(l3, startX, startY + h + 32)
-  ctx.restore()
-}
 
 /* ────────────────────────────── Primitives ───────────────────────────── */
 
@@ -731,24 +617,24 @@ function tcpFlagsToStr(flags){return [['U',5],['A',4],['P',3],['R',2],['S',1],['
 function drawLegend(ctx, W, H, meta, source) {
   if (!meta) return
   
-  // Simple legend in bottom left
+  // Infernal legend in bottom left
   const legendX = 20, legendY = H - 80
-  const legendW = 250, legendH = 60
+  const legendW = 280, legendH = 60
   
   ctx.save()
-  ctx.fillStyle = 'rgba(8,10,12,0.8)'
-  ctx.strokeStyle = 'rgba(0,0,0,0.5)'
-  ctx.lineWidth = 1
-  roundRect(ctx, legendX, legendY, legendW, legendH, 6, true, true)
+  ctx.fillStyle = 'rgba(60,20,0,0.9)'
+  ctx.strokeStyle = 'rgba(255,100,0,0.6)'
+  ctx.lineWidth = 2
+  roundRect(ctx, legendX, legendY, legendW, legendH, 8, true, true)
   
-  ctx.fillStyle = '#87ceeb'
-  ctx.font = 'bold 10px ui-monospace, monospace'
-  ctx.fillText('❄️ SNOW STREAM', legendX + 8, legendY + 16)
+  ctx.fillStyle = '#ff6600'
+  ctx.font = 'bold 11px "Creepster", monospace'
+  ctx.fillText('🔥 INFERNAL STREAM', legendX + 8, legendY + 18)
   
-  ctx.fillStyle = '#cfeee0'
-  ctx.font = '9px ui-monospace, monospace'
-  ctx.fillText(`❄️ SOURCE: ${source === 'example' ? 'SAMPLE.PCAP' : 'UPLOADED.PCAP'}`, legendX + 8, legendY + 32)
-  ctx.fillText(`🌨️ VERSION: ${meta.version} | SNAPLEN: ${meta.snaplen}`, legendX + 8, legendY + 46)
+  ctx.fillStyle = '#ffcc00'
+  ctx.font = '9px "Creepster", monospace'
+  ctx.fillText(`🔥 SOURCE: ${source === 'example' ? 'HELL.PCAP' : 'DAMNED.PCAP'}`, legendX + 8, legendY + 35)
+  ctx.fillText(`👹 VERSION: ${meta.version} | SNAPLEN: ${meta.snaplen}`, legendX + 8, legendY + 50)
   
   ctx.restore()
 }
@@ -761,22 +647,22 @@ function UploadHelpCard() {
       aria-hidden
       style={{
         position: 'absolute',
-        bottom: 24, right: 24, maxWidth: 360,
-        borderRadius: 12, padding: 16,
-        border: '1px solid rgba(0,0,0,0.4)',
-        background: 'rgba(10,12,14,0.6)', backdropFilter: 'blur(6px)',
-        color: 'var(--text)', boxShadow: '0 0 14px rgba(0,0,0,0.2)',
-        fontFamily: 'ui-monospace, Menlo, monospace', zIndex: 2
+        bottom: 24, right: 24, maxWidth: 380,
+        borderRadius: 15, padding: 18,
+        border: '2px solid rgba(255,100,0,0.6)',
+        background: 'rgba(60,20,0,0.9)', backdropFilter: 'blur(8px)',
+        color: '#ffcc00', boxShadow: '0 0 25px rgba(255,100,0,0.4)',
+        fontFamily: '"Creepster", monospace', zIndex: 2
       }}
     >
-      <div style={{ opacity: .8, fontSize: 12, marginBottom: 6, letterSpacing: '.08em' }}>❄️ winter protocol analysis</div>
-      <div style={{ fontWeight: 700, marginBottom: 8, color: '#87ceeb', textShadow: '0 0 5px rgba(135,206,250,0.3)' }}>PCAP to Snow Stream</div>
-      <ul style={{ margin: '0 0 6px 16px', padding: 0 }}>
-        <li>❄️ 예시 파일: <code>/pcaps/sample.pcap</code> 자동 로드</li>
-        <li>🌨️ 업로드 또는 드래그&드롭으로 교체</li>
-        <li>⛄ 드래그: grab · 더블클릭/Space: peel · R: reset</li>
+      <div style={{ opacity: .9, fontSize: 13, marginBottom: 8, letterSpacing: '.1em' }}>🔥 infernal protocol analysis</div>
+      <div style={{ fontWeight: 700, marginBottom: 10, color: '#ff6600', textShadow: '0 0 8px rgba(255,100,0,0.8)' }}>PCAP to Hell Stream</div>
+      <ul style={{ margin: '0 0 8px 18px', padding: 0 }}>
+        <li>🔥 예시 파일: <code>/pcaps/sample.pcap</code> 자동 로드</li>
+        <li>👹 업로드 또는 드래그&드롭으로 교체</li>
+        <li>🌋 R키: 지옥불 리셋</li>
       </ul>
-      <div style={{ opacity: .7, fontSize: 12 }}>현재 버전은 <b>PCAP</b>(Ethernet linktype)만 지원</div>
+      <div style={{ opacity: .8, fontSize: 12 }}>현재 버전은 <b>PCAP</b>(Ethernet linktype)만 지원</div>
     </div>
   )
 }

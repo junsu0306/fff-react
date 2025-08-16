@@ -147,7 +147,7 @@ export default function ArcCarousel({ items, height=560, cardSize={w:220,h:300} 
             }}
           >
             <div style={{opacity:.8, fontSize:12, letterSpacing:'.12em', textTransform:'lowercase', color:'var(--text)'}}>
-              december·twelve
+              best of best
             </div>
             <div style={{fontWeight:800, fontSize:34, lineHeight:1.05, color:'var(--text)'}}>
               {it.title}
