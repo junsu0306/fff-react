@@ -30,6 +30,15 @@ export default function PortalCarousel({ items, cardSize={w:200,h:280} }) {
     setTargetUrl('')
   }
 
+  // Mouse wheel handler
+  const handleWheel = (e) => {
+    if (isTransitioning) return
+    e.preventDefault()
+    
+    const delta = e.deltaY > 0 ? 5 : -5 // Scroll sensitivity
+    setRotation(prev => prev + delta)
+  }
+
   // Auto-rotation animation
   useEffect(() => {
     if (isHovering || isTransitioning) return
@@ -104,6 +113,7 @@ export default function PortalCarousel({ items, cardSize={w:200,h:280} }) {
         overflow: 'hidden',
         pointerEvents: 'none' // Prevent container from blocking clicks
       }}
+      onWheel={handleWheel}
     >
 
       {/* Enhanced Orange Circle Effects - Much Larger */}
