@@ -1,0 +1,151 @@
+/* Overall container styles */
+.page3-container {
+  position: relative;
+  min-height: 100vh;
+  padding: 64px 24px 24px;
+  background: #0b1220;
+  color: #e6f0ff;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+/* Animated neon gradient backdrop */
+.animated-background {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 60% at 70% 30%, rgba(0, 255, 200, 0.12), transparent 60%),
+    radial-gradient(50% 50% at 30% 70%, rgba(0, 180, 255, 0.1), transparent 60%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+/* Fullscreen variant for immersive scenes */
+.page3-fullscreen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #0b1220;
+  color: #e6f0ff;
+  font-family: sans-serif;
+}
+
+/* Canvas that fills the entire container */
+.full-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Bottom container for protocol selection tabs */
+.protocol-tabs-bottom {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 2000;
+}
+
+/* Wrapper for the back button on page 3 */
+.page3-back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2000;
+}
+
+/* Back button styling (전역 스타일과 톤 맞춤) */
+.back-btn {
+  border: 1px solid rgba(0, 255, 157, 0.35);
+  border-radius: 10px;
+  padding: 6px 12px;
+  background: rgba(0, 255, 157, 0.06);
+  color: #cfeee0;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  text-shadow: 0 0 4px rgba(0, 255, 157, 0.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.back-btn:hover {
+  background: rgba(0, 255, 157, 0.12);
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+}
+
+/* 프로토콜 탭 (네온 톤) */
+.protocol-tab {
+  border: 1px solid rgba(0, 255, 157, 0.35);
+  border-radius: 10px;
+  padding: 8px 20px;
+  background: rgba(0, 255, 157, 0.06);
+  color: #cfeee0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  text-shadow: 0 0 4px rgba(0, 255, 157, 0.5);
+  user-select: none;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s, border-color 0.2s;
+}
+.protocol-tab:hover {
+  background: rgba(0, 255, 157, 0.12);
+  box-shadow: 0 0 8px rgba(0, 255, 157, 0.15);
+}
+.protocol-tab.active {
+  background: rgba(0, 255, 157, 0.18);
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+  color: #ffffff;
+  border-color: rgba(0, 255, 157, 0.5);
+}
+
+/* ─────────────────────────────────────────────
+ * 라이브 패럴랙스 배경 (index.css와 동일 톤)
+ * ───────────────────────────────────────────── */
+.live-bg {
+  position: fixed;
+  inset: -2%;
+  z-index: -1;
+  pointer-events: none;
+  background: url('/images/background.jpg') center / cover no-repeat;
+  will-change: transform, filter;
+  transform: translate3d(var(--mx), var(--my), 0) scale(1.06);
+  filter: brightness(0.85) saturate(1.05) contrast(1.05);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  0%   { transform: translate3d(calc(var(--mx) - 1.5%), calc(var(--my) - 1%), 0)   scale(1.06); }
+  50%  { transform: translate3d(calc(var(--mx) + 1.2%), calc(var(--my) + 1%), 0)   scale(1.06); }
+  100% { transform: translate3d(calc(var(--mx) - 1%),   calc(var(--my) + 1.5%), 0) scale(1.06); }
+}
+
+.live-bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1000px 560px at 50% 115%, rgba(0, 255, 157, 0.08), transparent 70%),
+    radial-gradient(900px 420px at 50% -10%, rgba(0, 255, 157, 0.05), transparent 60%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.6));
+  mix-blend-mode: screen;
+  animation: pulse 8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-bg,
+  .live-bg-overlay {
+    animation: none !important;
+    transform: none !important;
+  }
+}
