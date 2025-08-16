@@ -44,10 +44,11 @@ coverage/
 # --- OS 별 불필요 파일 ---
 .DS_Store
 Thumbs.db
-
+*.Zone.Identifier
 # --- 기타 임시 파일 ---
 *.swp
 *.swo
 *.tmp
 *.pid
 *.pid.lock
+*.Zone.Identifier
