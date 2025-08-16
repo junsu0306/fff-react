@@ -7,7 +7,7 @@ export default function Page10() {
       <div style={{maxWidth:980, margin:'64px auto 0'}}>
         <h1 style={{fontSize:48, margin:'0 0 12px', letterSpacing:'-0.02em'}}>Page 10</h1>
         <p style={{opacity:.8, marginTop:0}}>
-          여기에 각자 인터랙티브 페이지 코드를 추가하세요. (src/pages/Page10.jsx)
+          여기에 각자 인터랙티브 페이지 코드를 추가하세요. (src/pages/Page05.jsx)
         </p>
         <div style={{marginTop:24, border:'1px dashed rgba(255,255,255,.22)', borderRadius:12, padding:24, opacity:.75}}>
           {/* Demo placeholder */}
