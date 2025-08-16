@@ -1,5 +1,5 @@
-import React, { useState, useRef, useLayoutEffect, useMemo, useEffect } from 'react';
-import './Page02.css';
+import React, { useState, useRef, useLayoutEffect, useMemo } from 'react';
+import './Page02.css'; // Page02.css는 이전의 '아이소메트릭/보라색' 테마 버전을 그대로 사용
 import BackButton from '../components/BackButton.jsx';
 
 // --- 데이터 영역 ---
@@ -12,7 +12,6 @@ const wordsData = [
 ];
 
 const baseText = `Information travels across the internet in small pieces called packets. Each packet is like a digital envelope, containing a portion of the data and addressing information. This process is governed by a suite of protocols, primarily TCP/IP, which ensures data arrives reliably. Routers across the globe inspect the destination address on each packet and forward it closer to its recipient. This complex dance happens in milliseconds, creating the seamless experience of browsing the web. Every part of this system has a specific purpose, a clear example of how form must follow its intended design. Security is layered on top of this, using complex algorithms to protect the data within each packet from unauthorized access. The entire system is a marvel of modern engineering, a testament to decades of innovation in computer science and communication technology, enabling our interconnected world to function.`;
-
 
 // --- 인터랙티브 로직 컴포넌트 ---
 function CryptoInteraction() {
@@ -127,45 +126,25 @@ function CryptoInteraction() {
 // --- 페이지의 전체 레이아웃을 담당하는 기본 컴포넌트 ---
 export default function Page02() {
 
-    const [transitionState, setTransitionState] = useState({
-        isOpening: false,
-        isFinished: false,
-    });
-
-    // 페이지 전환 애니메이션을 위한 useEffect
-    useEffect(() => {
-        const openTimer = setTimeout(() => {
-            setTransitionState(prevState => ({ ...prevState, isOpening: true }));
-        }, 100);
-
-        const finishTimer = setTimeout(() => {
-            setTransitionState(prevState => ({ ...prevState, isFinished: true }));
-        }, 1500);
-
-        return () => {
-            clearTimeout(openTimer);
-            clearTimeout(finishTimer);
-        };
-    }, []);
-
     return (
-        <div className="page02-container">
-            {/* 페이지 전환 오버레이 */}
-            {!transitionState.isFinished && (
-                <div
-                    className={`page-turn-container ${transitionState.isOpening ? 'opening' : ''}`}
-                    style={{ opacity: transitionState.isFinished ? 0 : 1 }}
-                >
-                    <div className="page-cover left">
-                        <p>// Accessing...</p>
-                    </div>
-                    <div className="page-cover right">
-                        <p>Network Deck</p>
-                    </div>
-                </div>
-            )}
-
-            {/* 실제 페이지 콘텐츠 */}
+        // 1. 이 div가 이제 화면 전체를 덮는 배경이 됩니다
+        <div
+            className="page02-container"
+            style={{
+                backgroundImage: `url('/images/cast.png')`, // public/images/cast.png 경로
+                backgroundColor: '#eaf2f8', // 이미지가 로드되기 전의 배경색
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+                backgroundRepeat: 'no-repeat',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                overflowY: 'auto',
+            }}
+        >
+            {/* 2. 그 위에 콘텐츠가 올라옵니다 */}
             <div className="page02-content-wrapper">
                 <div style={{ maxWidth: 980, margin: '0 auto' }}>
                     <BackButton />

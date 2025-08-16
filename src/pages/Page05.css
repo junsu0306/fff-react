@@ -1,0 +1,124 @@
+/* --- ★★★ Page05 전체를 덮는 컨테이너 스타일 (배경 제거) ★★★ --- */
+.page05-container {
+    /* 화면 전체를 덮도록 설정 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* 이제 배경은 JSX에서 직접 제어하므로 CSS에서는 제거 */
+
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Consolas', 'Courier New', monospace;
+}
+
+/* --- 콘텐츠 스타일 --- */
+.page05-content-wrapper {
+    min-height: 100%;
+    padding: 64px 24px 24px;
+    box-sizing: border-box;
+    color: #e0e0e0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+    .page05-content-wrapper h1 {
+        color: #ffffff;
+    }
+
+    .page05-content-wrapper p {
+        opacity: 0.9;
+    }
+
+/* --- 인터랙션 영역 스타일 --- */
+.perspective-shifter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.perspective-toggle {
+    margin-bottom: 40px;
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-family: inherit;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .perspective-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.6);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+.code-blocks-container {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.code-block {
+    width: 100%;
+    max-width: 280px;
+    min-height: 150px;
+    background-color: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 16px;
+    box-sizing: border-box;
+    flex: 1;
+}
+
+    .code-block h3 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        color: #a0a0a0;
+        font-size: 0.9em;
+        font-weight: 400;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 8px;
+    }
+
+    .code-block pre {
+        margin: 0;
+        font-family: inherit;
+        font-size: 1.1em;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-all;
+        color: #d0d0d0;
+    }
+
+    .code-block .token-keyword {
+        color: #f97583;
+    }
+
+    .code-block .token-number {
+        color: #79c0ff;
+    }
+
+    .code-block .token-operator {
+        color: #f97583;
+    }
+
+/* 타이핑 커서 애니메이션 */
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.typing-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.2em;
+    background-color: #58a6ff;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+}

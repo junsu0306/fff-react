@@ -1,0 +1,161 @@
+/* --- Page08 전체를 덮는 컨테이너 스타일 --- */
+.page08-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #000;
+    color: #a9a9a9;
+    font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+/* ★★★ 1. 악마 이미지를 위한 배경 레이어 (가장 아래) ★★★ */
+.demon-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/devil.png');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.6);
+    transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    z-index: 1; /* z-index의 기준 */
+}
+
+.page08-container:hover .demon-background-image {
+    transform: scale(1.05);
+}
+
+/* ★★★ 2. 불꽃(약점)들을 담는 인터랙션 레이어 (중간) ★★★ */
+.weakness-points-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3; /* UI보다 위에 위치 */
+    /* 컨테이너 자체는 클릭되지 않도록 하여 아래 UI가 보이게 함 */
+    pointer-events: none;
+}
+
+/* ★★★ 3. 콘텐츠 UI 레이어 (배경과 불꽃 사이) ★★★ */
+.page08-content-wrapper {
+    position: relative;
+    z-index: 2; /* 배경보다는 위, 불꽃보다는 아래 */
+    min-height: 100%;
+    padding: 64px 24px 24px;
+    box-sizing: border-box;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+    color: #ccc;
+}
+
+    .page08-content-wrapper h1, .page08-content-wrapper p {
+        text-align: center;
+        text-shadow: 0 2px 4px #000;
+    }
+
+
+/* --- 불꽃 효과 애니메이션 --- */
+@keyframes flame-flicker {
+    0%, 100% {
+        transform: scaleY(1) skewX(-10deg);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: scaleY(1.2) skewX(10deg);
+        opacity: 1;
+    }
+}
+
+@keyframes smoke-rising {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.1;
+    }
+
+    100% {
+        transform: translateY(-50px) scale(3);
+        opacity: 0;
+    }
+}
+
+/* 개별 약점(불꽃) 컨테이너 */
+.weakness-point {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    /* ★★★ 이 컨테이너가 마우스 이벤트를 받을 수 있도록 설정 ★★★ */
+    pointer-events: all;
+}
+
+/* 불꽃의 본체 */
+.flame {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 15px;
+    height: 50px;
+    background: #ff4800;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    transform: translateX(-50%);
+    filter: blur(8px);
+    animation: flame-flicker 1s infinite alternate;
+}
+
+    .flame::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 10px;
+        height: 35px;
+        background: #ffdd00;
+        border-radius: inherit;
+        transform: translateX(-50%) scale(1.1);
+        filter: blur(7px);
+        animation: flame-flicker 1.2s infinite alternate-reverse;
+    }
+
+    .flame::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 25px;
+        height: 25px;
+        background: rgba(255, 100, 0, 0.3);
+        border-radius: 50%;
+        transform: translateX(-50%);
+        filter: blur(12px);
+        animation: smoke-rising 2.5s infinite ease-out;
+    }
+
+/* 위험도 텍스트 스타일 */
+.risk-text {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff4800;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-shadow: 0 0 5px #ffdd00, 0 0 10px #ff4800, 0 0 15px #ff4800;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+}
+/* 마우스를 올렸을 때 위험도 텍스트가 나타나는 로직 */
+.weakness-point:hover .risk-text {
+    opacity: 1;
+    bottom: 120%;
+}
