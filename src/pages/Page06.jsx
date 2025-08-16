@@ -1,122 +1,177 @@
 // src/pages/Page06.jsx
 import * as THREE from 'three';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { useRef, useMemo, useState, useCallback } from 'react';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { Suspense, useRef, useMemo, useState, useCallback, useLayoutEffect } from 'react';
 import { animated, useSpring } from '@react-spring/three';
 import BackButton from '../components/BackButton.jsx';
 
-function BlockchainNetwork() {
-  const groupRef = useRef();
-  // 기존 노드 및 기본 연결을 useMemo로 생성
-  const { nodes, connections } = useMemo(() => {
-    const nodePositions = [];
-    const connections = [];
-    const count = 30;
+// ───────────────────── 해골 스프라이트 ─────────────────────
+function SkullSprite({ onClick }) {
+  const map = useLoader(THREE.TextureLoader, '/images/skull.png'); // public/images/skull.png
+  map.colorSpace = THREE.SRGBColorSpace;
+  return (
+    <sprite onClick={onClick} scale={[0.9, 0.9, 1]}>
+      <spriteMaterial map={map} transparent depthWrite={false} />
+    </sprite>
+  );
+}
 
+// ──────────────── 쇠사슬: 두 점(start~end) 사이에 토러스 인스턴싱 ────────────────
+function Chain({ start, end, linkSpacing = 0.34, color = '#c5ccd8' }) {
+  const instRef = useRef();
+  const tmpObj = useMemo(() => new THREE.Object3D(), []);
+  const dir = useMemo(() => new THREE.Vector3().copy(end).sub(start), [start, end]);
+  const len = dir.length();
+  const dirNorm = useMemo(() => dir.clone().normalize(), [dir]);
+  const quat = useMemo(
+    () => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirNorm),
+    [dirNorm]
+  );
+  const geometry = useMemo(() => new THREE.TorusGeometry(0.1, 0.03, 12, 24), []);
+  const material = useMemo(
+    () => new THREE.MeshStandardMaterial({ color, metalness: 1.0, roughness: 0.25, envMapIntensity: 0.9 }),
+    [color]
+  );
+  const count = Math.max(1, Math.floor(len / linkSpacing));
+
+  useLayoutEffect(() => {
+    if (!instRef.current) return;
     for (let i = 0; i < count; i++) {
-      nodePositions.push(
-        new THREE.Vector3(
-          (Math.random() - 0.5) * 10,
-          (Math.random() - 0.5) * 10,
-          (Math.random() - 0.5) * 10
-        )
-      );
+      const t = (i + 0.5) * (len / count);
+      const pos = new THREE.Vector3().copy(start).add(dirNorm.clone().multiplyScalar(t));
+      const q = quat.clone();
+      const twist = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), (i % 2) * Math.PI * 0.5);
+      q.multiply(twist);
+
+      tmpObj.position.copy(pos);
+      tmpObj.quaternion.copy(q);
+      tmpObj.scale.set(1.8, 1.0, 0.8);
+      tmpObj.updateMatrix();
+      instRef.current.setMatrixAt(i, tmpObj.matrix);
     }
+    instRef.current.instanceMatrix.needsUpdate = true;
+  }, [count, dirNorm, len, quat, start, tmpObj]);
+
+  return <instancedMesh ref={instRef} args={[geometry, material, count]} castShadow receiveShadow />;
+}
+
+/** DungeonChain: 해골 노드 + 쇠사슬 + 클릭 시 레드 네온 라인 */
+function DungeonChain() {
+  const groupRef = useRef();
+
+  // 노드 & "항상 연결"되는 엣지 생성
+  const { nodes, connections } = useMemo(() => {
+    const count = 20;
+    const positions = Array.from({ length: count }, () =>
+      new THREE.Vector3((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8)
+    );
+
+    // 인덱스 기반 엣지 집합
+    const edgesIdx = [];
+    const added = new Set();
+    const addEdge = (a, b) => {
+      if (a === b) return;
+      const key = a < b ? `${a}-${b}` : `${b}-${a}`;
+      if (added.has(key)) return;
+      added.add(key);
+      edgesIdx.push([a, b]);
+    };
+
+    // 1) 랜덤 스패닝 트리(연결성 보장)
+    const order = [...Array(count).keys()];
+    for (let i = 1; i < count; i++) {
+      const a = order[i];
+      const b = order[Math.floor(Math.random() * i)];
+      addEdge(a, b);
+    }
+
+    // 2) 여분 엣지 추가(보기 좋게)
+    const extra = Math.floor(count * 0.5);
+    for (let k = 0; k < extra; k++) {
+      const i = Math.floor(Math.random() * count);
+      let j = Math.floor(Math.random() * count);
+      if (i === j) j = (j + 1) % count;
+      addEdge(i, j);
+    }
+
+    // 3) 최소 차수 2 보장(고립/편도 방지)
+    const deg = Array(count).fill(0);
+    edgesIdx.forEach(([i, j]) => {
+      deg[i]++; deg[j]++;
+    });
     for (let i = 0; i < count; i++) {
-      for (let j = i + 1; j < count; j++) {
-        if (Math.random() < 0.1) {
-          connections.push([nodePositions[i], nodePositions[j]]);
+      while (deg[i] < 2) {
+        let best = -1, bestD = Infinity;
+        for (let j = 0; j < count; j++) {
+          if (i === j) continue;
+          const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+          if (added.has(key)) continue;
+          const d = positions[i].distanceToSquared(positions[j]);
+          if (d < bestD) { bestD = d; best = j; }
         }
+        if (best >= 0) {
+          addEdge(i, best);
+          deg[i]++; deg[best]++;
+        } else break;
       }
     }
-    return { nodes: nodePositions, connections };
+
+    // 벡터 페어로 변환
+    const conns = edgesIdx.map(([i, j]) => [positions[i], positions[j]]);
+    return { nodes: positions, connections: conns };
   }, []);
 
-  // 추가 연결 상태 관리
+  // 클릭 시 레드 네온 라인
   const [extraConnections, setExtraConnections] = useState([]);
-
-  // 애니메이션 (새 연결에 대한 투명도 애니메이션)
   const { opacity } = useSpring({
-    opacity: extraConnections.length > 0 ? 0.6 : 0,
+    opacity: extraConnections.length > 0 ? 1.0 : 0,
     config: { mass: 1, tension: 280, friction: 40 },
   });
 
-  // 클릭 시 호출되는 핸들러: 클릭된 노드를 다른 노드들과 연결
-  const handleNodeClick = useCallback(
-    (clickedIndex) => {
+  const handleClick = useCallback(
+    (index) => {
       const newConns = [];
-      nodes.forEach((pos, idx) => {
-        if (idx !== clickedIndex) {
-          newConns.push([nodes[clickedIndex], pos]);
-        }
+      nodes.forEach((_, idx) => {
+        if (idx !== index) newConns.push([nodes[index], nodes[idx]]);
       });
       setExtraConnections(newConns);
-      // 일정 시간 후 연결선 제거
-      setTimeout(() => setExtraConnections([]), 2000);
+      setTimeout(() => setExtraConnections([]), 2500);
     },
     [nodes]
   );
 
-  // 회전 애니메이션
+  // 그룹 회전
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15;
-      groupRef.current.rotation.x += delta * 0.08;
+      groupRef.current.rotation.y += delta * 0.05;
+      groupRef.current.rotation.x += delta * 0.025;
     }
   });
 
   return (
     <group ref={groupRef}>
-      {/* 큐브 렌더링 + 클릭 이벤트 */}
+      {/* 해골 노드 + 약한 오렌지 포인트 라이트 */}
       {nodes.map((position, idx) => (
-        <mesh
-          key={`cube-${idx}`}
-          position={position}
-          castShadow
-          receiveShadow
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            handleNodeClick(idx);
-          }}
-        >
-          <boxGeometry args={[0.3, 0.3, 0.3]} />
-          <meshStandardMaterial
-            color="#00ffc8"
-            emissive="#00ffc8"
-            emissiveIntensity={0.9}
-            metalness={0.3}
-            roughness={0.1}
-          />
-        </mesh>
+        <group key={`node-${idx}`} position={position}>
+          <SkullSprite onClick={() => handleClick(idx)} />
+          <pointLight position={[0, 0, 0]} intensity={1.3} distance={2.8} color="#ff6a2a" />
+        </group>
       ))}
 
-      {/* 기본 연결선 렌더링 */}
-      {connections.map((conn, idx) => {
-        const [start, end] = conn;
-        const points = [start, end];
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        return (
-          <line key={`line-${idx}`} geometry={geometry}>
-            <lineBasicMaterial color="#00ffd5" transparent opacity={0.4} />
-          </line>
-        );
-      })}
+      {/* 기본 연결: 쇠사슬 */}
+      {connections.map(([start, end], idx) => (
+        <Chain key={`chain-${idx}`} start={start} end={end} linkSpacing={0.34} color="#c5ccd8" />
+      ))}
 
-      {/* 클릭에 의해 생성되는 추가 연결선 (애니메이션 적용) */}
+      {/* 클릭 시 나타나는 레드 네온 라인 (Bloom으로 번쩍) */}
       {extraConnections.map((conn, idx) => {
         const [start, end] = conn;
-        const points = [start, end];
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
         return (
-          <animated.line key={`extra-${idx}`} geometry={geometry}>
-            <lineBasicMaterial color="#ff00ff" transparent />
-            <animated.lineBasicMaterial
-              attach="material"
-              color="#ff00ff"
-              transparent
-              opacity={opacity}
-            />
+          <animated.line key={`neon-${idx}`} geometry={geo}>
+            <animated.lineBasicMaterial color="#ff3b3b" transparent opacity={opacity} />
           </animated.line>
         );
       })}
@@ -130,29 +185,34 @@ export default function Page06() {
       <BackButton />
       <div
         style={{
-          height: '100vh',
-          width: '100%',
           position: 'relative',
-          backgroundColor: '#000',
+          width: '100%',
+          height: '100vh',
           overflow: 'hidden',
+          backgroundImage: 'url(/images/hell.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       >
-        <Canvas
-          shadows
-          camera={{ position: [0, 0, 12], fov: 40 }}
-          gl={{ antialias: true }}
-        >
-          <ambientLight intensity={0.3} />
-          <pointLight position={[10, 10, 10]} intensity={1.2} />
-          <BlockchainNetwork />
+        <Canvas camera={{ position: [0, 0, 12], fov: 45 }} shadows gl={{ antialias: true }}>
+          <ambientLight intensity={0.1} />
+          <Suspense fallback={null}>
+            <DungeonChain />
+            <EffectComposer>
+              {/* 레드 네온을 더 강하게 */}
+              <Bloom luminanceThreshold={0.12} luminanceSmoothing={0.18} intensity={1.8} />
+            </EffectComposer>
+          </Suspense>
           <OrbitControls enableZoom={false} enablePan={false} />
         </Canvas>
+
+        {/* ───────────── 오버레이(레드/오렌지 계열로 변경) ───────────── */}
         <div
           style={{
             position: 'absolute',
             top: '20%',
             left: '10%',
-            color: '#00ffc8',
+            color: '#ff5e00',
             pointerEvents: 'none',
           }}
         >
@@ -160,18 +220,19 @@ export default function Page06() {
             style={{
               fontSize: '3rem',
               margin: '0 0 0.5rem 0',
-              fontWeight: 600,
-              textShadow: '0 0 10px #00ffc8',
+              fontWeight: 700,
+              textShadow: '0 0 12px #ff2d00, 0 0 24px #b30000',
             }}
           >
-            Block&nbsp;Chain
+            {'Block\u00A0Chain'}
           </h1>
           <p
             style={{
               fontSize: '1.2rem',
               maxWidth: '400px',
               lineHeight: 1.4,
-              textShadow: '0 0 5px #00ffc8',
+              textShadow: '0 0 6px #ff2d00',
+              color: '#ffd6c9', // 본문은 살짝 밝게
             }}
           >
             A decentralized network of interconnected blocks and trustless ledgers.
