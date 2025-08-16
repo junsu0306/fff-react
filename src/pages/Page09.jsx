@@ -1,5 +1,5 @@
 // src/pages/Page09.jsx
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react'
 import BackButton from '../components/BackButton.jsx'
 
 export default function Page09() {
@@ -10,12 +10,12 @@ export default function Page09() {
       {/* Page-wide background styles */}
       <style>{`
         .page9-wrap {
-          background-image: url(/images/background.jpg);
+          background: #000;                           /* ← 기본 배경 이미지를 검정으로 */
           background-size: cover;
           background-position: center;
           transition: background 300ms ease, background-image 300ms ease, filter 300ms ease;
         }
-        .page9-wrap.bob-bg {
+        .page9-wrap.bob-bg {                          /* ← BoB 모드는 기존 배경 유지 */
           background-image: url(/images/bob_bg_pixel.png);
           background-size: cover;
           background-position: center;
@@ -48,7 +48,7 @@ function Terminal({ onModeChange }) {
   const [histIdx, setHistIdx] = useState(-1)
   const [banner, setBanner] = useState(true)     // 상단 ASCII 배너 표시 여부
   const [savedBanner, setSavedBanner] = useState(true) // bob 진입 전에 상태 저장
-  const [theme, setTheme] = useState('neon')     // neon | dim | crt
+  const [theme, setTheme] = useState('neon')     // neon | dim | crt (기본=레드 계열)
   const [mode, setMode] = useState('default')    // default | bob
   const [prevTheme, setPrevTheme] = useState('neon')   // bob 탈출 시 복구용
   const scrollRef = useRef(null)
@@ -244,17 +244,17 @@ function Terminal({ onModeChange }) {
         ])
       },
 
-      // ====== BoB 전용 쉘: 전체 페이지 배경 교체 + 콘솔 리셋 ======
+      // ====== BoB 전용 쉘 ======
       bob: async () => {
         if (mode === 'bob') { pushLine(sys('Already in BoB shell. Type "exit" to leave.')); return }
         setPrevTheme(theme)
         setSavedBanner(banner)
-        setBanner(false)        // 기본 배너 숨김 (BoB 로고만 보여주기)
+        setBanner(false)
         setMode('bob')
         setTheme('crt')
-        onModeChange?.('bob')   // <<< Page 배경 전환
+        onModeChange?.('bob')
 
-        setLines([])            // <<< 콘솔 비우기
+        setLines([])
         const logo = [
           '██████╗  ██████╗ ██████╗ ',
           '██╔══██╗██╔═══██╗██╔══██╗',
@@ -264,7 +264,7 @@ function Terminal({ onModeChange }) {
           '╚═════╝  ╚═════╝ ╚═╝  ╚═╝  shell'
         ]
         pushLine(sys('[BoB] switching shell & theme...'))
-        await sleep(180);
+        await new Promise(r=>setTimeout(r,180));
         pushLine(out(''))
         logo.forEach((t,i)=>setTimeout(()=>pushLine({type:'out', text:t}), i*40))
         setTimeout(()=>{
@@ -277,14 +277,14 @@ function Terminal({ onModeChange }) {
         }, logo.length*40 + 20)
       },
 
-      // ====== 원래 쉘로 복귀: 배경/테마/배너 복구 + 콘솔 리셋 ======
+      // ====== 복귀 ======
       exit: () => {
         if (mode !== 'bob') { pushLine(err('exit: not in BoB shell')); return }
-        onModeChange?.('default')   // <<< Page 배경 원상복귀
+        onModeChange?.('default')
         setMode('default')
         setTheme(prevTheme || 'neon')
-        setBanner(savedBanner)      // 진입 전 배너 상태 복구
-        setLines([])                // 콘솔 비우고 기본 부팅 출력
+        setBanner(savedBanner)
+        setLines([])
         bootSequence()
       },
 
@@ -352,47 +352,53 @@ function Terminal({ onModeChange }) {
     setTimeout(()=>el.classList.remove('glitch'), 250)
   }
 
+  // === 테마 팔레트: 기본은 레드/오렌지 계열, BoB 모드만 블루 오버라이드 ===
   const themeStyle = useMemo(() => {
-    // 기본(그린 계열) 팔레트
     let vars
     if (theme === 'crt') {
       vars = {
-        '--ter-bg':'rgba(0,12,0,.78)',
-        '--ter-border':'rgba(0,255,157,.25)',
-        '--ter-glow':'0 0 18px rgba(0,255,157,.25)',
-        '--ter-text':'#8CFFDA',        // 기본 본문색(그린 틴트)
-        '--ter-accent':'#00ff9d',      // 프롬프트/커서 등
-        '--ter-sys':'#a7ffda'          // 시스템 메시지 색
+        '--ter-bg':'rgba(18,0,0,.80)',
+        '--ter-border':'rgba(255,64,64,.28)',
+        '--ter-glow':'0 0 18px rgba(255,64,64,.22)',
+        '--ter-text':'#ffe2e2',
+        '--ter-accent':'#ff3b3b',
+        '--ter-accent-soft':'rgba(255,64,64,.22)',
+        '--ter-sys':'#ffc7c7'
       }
     } else if (theme === 'dim') {
       vars = {
-        '--ter-bg':'rgba(10,12,14,.72)',
-        '--ter-border':'rgba(255,255,255,.08)',
-        '--ter-glow':'0 0 12px rgba(0,0,0,.35)',
-        '--ter-text':'#d6efe4',
-        '--ter-accent':'#a7ffda',
-        '--ter-sys':'#c8ffe9'
+        '--ter-bg':'rgba(12,8,8,.74)',
+        '--ter-border':'rgba(255,96,64,.18)',
+        '--ter-glow':'0 0 12px rgba(255,80,64,.16)',
+        '--ter-text':'#f3d9d9',
+        '--ter-accent':'#ff5a3a',
+        '--ter-accent-soft':'rgba(255,90,58,.2)',
+        '--ter-sys':'#ffd5cc'
       }
     } else {
+      // neon
       vars = {
-        '--ter-bg':'rgba(8,10,12,.78)',
-        '--ter-border':'rgba(0,255,157,.35)',
-        '--ter-glow':'0 0 18px rgba(0,255,157,.18)',
-        '--ter-text':'#cfeee0',
-        '--ter-accent':'#00ff9d',
-        '--ter-sys':'#a7ffda'
+        '--ter-bg':'rgba(24,4,4,.78)',
+        '--ter-border':'rgba(255,72,72,.38)',
+        '--ter-glow':'0 0 20px rgba(255,72,72,.28)',
+        '--ter-text':'#ffdede',
+        '--ter-accent':'#ff2d2d',
+        '--ter-accent-soft':'rgba(255,45,45,.24)',
+        '--ter-sys':'#ffc9c9'
       }
     }
-    // === BoB 모드: 블루 계열로 전체 오버라이드 ===
-   if (mode === 'bob') {
-     vars['--ter-border'] = 'rgba(64,160,255,.55)'
-     vars['--ter-glow']   = '0 0 22px rgba(64,160,255,.28)'
-     vars['--ter-accent'] = '#7cc4ff'  // 프롬프트/커서/하이라이트
-     vars['--ter-text']   = '#dbeeff'  // 본문 텍스트
-     vars['--ter-sys']    = '#b9dcff'  // 시스템 메시지
-   }
-   return vars
- }, [theme, mode])
+    // === BoB 모드: 블루 계열 유지(기존과 동일) ===
+    if (mode === 'bob') {
+      vars['--ter-border'] = 'rgba(64,160,255,.55)'
+      vars['--ter-glow']   = '0 0 22px rgba(64,160,255,.28)'
+      vars['--ter-accent'] = '#7cc4ff'
+      vars['--ter-accent-soft'] = 'rgba(124,196,255,.22)'
+      vars['--ter-text']   = '#dbeeff'
+      vars['--ter-sys']    = '#b9dcff'
+      vars['--ter-bg']     = 'rgba(0,12,24,.78)'
+    }
+    return vars
+  }, [theme, mode])
 
   return (
     <div className="term-wrap" style={{position:'relative'}}>
@@ -422,7 +428,7 @@ function Terminal({ onModeChange }) {
           pointer-events:none;
         }
         @keyframes flicker { 0%,100%{opacity:.43} 50%{opacity:.38} }
-        .glow { text-shadow: 0 0 6px var(--ter-accent), 0 0 12px rgba(0,255,157,.14); }
+        .glow { text-shadow: 0 0 6px var(--ter-accent), 0 0 12px var(--ter-accent-soft); } /* ← 레드 계열 글로우 */
         .cursor {
           display:inline-block; width:10px; height:1.25em; translate:0 .2em;
           background: var(--ter-accent);

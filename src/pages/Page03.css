@@ -113,7 +113,7 @@
   inset: -2%;
   z-index: -1;
   pointer-events: none;
-  background: url('/images/background.jpg') center / cover no-repeat;
+  background: url('/images/world_hell.png') center / cover no-repeat;
   will-change: transform, filter;
   transform: translate3d(var(--mx), var(--my), 0) scale(1.06);
   filter: brightness(0.85) saturate(1.05) contrast(1.05);
