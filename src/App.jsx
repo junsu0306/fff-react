@@ -15,7 +15,7 @@ import Page09 from './pages/Page09.jsx'
 
 const items = Array.from({ length: 9 }).map((_, i) => ({
   title: [
-    'Infernal Pckets', 'Cipher', 'TCP & UDP Packet', 'Arm vs x86-64', 'Assembley', 'Block Chain', 'Binary Sea', 'Vulnerability', 'BoB-shell'
+    'Infernal Packets', 'Cipher', 'TCP & UDP Packet', 'Arm vs x86-64', 'Assembly', 'Block Chain', 'Binary Sea', 'Vulnerability', 'BoB-shell'
   ][i] || `Page ${i+1}`,
   href: `/p/${i+1}`,
 }))
@@ -55,7 +55,7 @@ function Home() {
         opacity: .6,
         fontSize: 12
       }}>
-linear portals · dimensional energy · magical rotation
+JunsuHa · JinhoJeong · WonkyoungPark
       </div>
     </div>
   )
